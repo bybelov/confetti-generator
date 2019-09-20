@@ -1,20 +1,3 @@
-// This plugin will open a modal to prompt the user to enter a number, and
-// it will then create that many rectangles on the screen.
-
-// This file holds the main code for the plugins. It has access to the *document*.
-// You can access browser APIs in the <script> tag inside "ui.html" which has a
-// full browser enviroment (see documentation).
-
-/*
-Колонок
-Строк
-
-Случайная прозрачность
-Случайные размеры
-Случайные повороты
-
-*/
-
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -23,13 +6,26 @@ function randomFloat(min, max) {
   return parseFloat(((Math.random() * (max - min)) + min).toFixed(1));
 }
 
-// function generateNodes(data) {
+function randn_bm(min, max, skew) {
+  var u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+
+  num = num / 10.0 + 0.5; // Translate to 0 -> 1
+  if (num > 1 || num < 0) num = randn_bm(min, max, skew); // resample between 0 and 1 if out of range
+  num = Math.pow(num, skew); // Skew
+  num *= max - min; // Stretch to fill range
+  num += min; // offset to min
+  return num;
+}
 
 
-
-// }
-
-figma.showUI(__html__, {width: 356, height: 440});
+figma.showUI(__html__, {
+  width: 356,
+  height: 440
+});
 
 figma.ui.onmessage = msg => {
   // One way of distinguishing between different types of messages sent from
@@ -38,25 +34,22 @@ figma.ui.onmessage = msg => {
   if (msg.type === 'generate-confetti') {
 
     const data = msg.data;
-
     var nodes = [];
-    
+
+    // selection nodes
     const selections = figma.currentPage.selection
-
-    const parentRoot = selections[0].parent
-    const parentRootWidth = parentRoot.width
-    const parentRooHeight = parentRoot.height
-
-    console.log(parentRoot, parentRooHeight, parentRootWidth);
-    
     const selectionsLength = selections.length
 
+    // parent node
+    const parentNode = selections[0].parent
+
+    // max x, y coordinates
+    const maxX = parentNode.width
+    const maxY = parentNode.height
 
     for (let i = 0; i < data.quantity; i++) {
 
       let el = selections[randomInt(0, selectionsLength)];
-      console.log(el.x, el.y);
-    
 
       // const newNode = node.cloneNode();
       // node.rotation = randomInt(0, 360);
@@ -67,22 +60,14 @@ figma.ui.onmessage = msg => {
       //   Math.floor(newNode.width * coefficient),
       //   Math.floor(newNode.height * coefficient)
       // );
+      el.opacity = randomFloat(0.1, 1);
 
-      // console.log('el', el.parent);
-      nodes.push(el)
+      el.x = randn_bm(0, (maxX - el.width), 1);
+      el.y = randn_bm(0, (maxY - el.height), 1);
 
-      // console.log(el.parent.type);
-      
-
+      // console.log(`el ${i}, id: ${el.id}, x: ${el.x}, y: ${el.y} `);
+      parentNode.appendChild(el.clone())
     }
-
-
-
-    // console.log('currentPage children', figma.currentPage.children);
-    
-    // console.log('nodes', nodes);
-    
-    
 
     // figma.currentPage.selection = nodes
     // figma.viewport.scrollAndZoomIntoView(nodes)
@@ -97,7 +82,6 @@ figma.ui.onmessage = msg => {
     // }
     // figma.currentPage.selection = nodes;
     // figma.viewport.scrollAndZoomIntoView(nodes);
-
 
   }
 
@@ -116,24 +100,23 @@ figma.ui.onmessage = msg => {
 // callback. The callback will be passed the "pluginMessage" property of the
 // posted message.
 // figma.ui.onmessage = msg => {
-  // One way of distinguishing between different types of messages sent from
-  // your HTML page is to use an object with a "type" property like this.
+// One way of distinguishing between different types of messages sent from
+// your HTML page is to use an object with a "type" property like this.
 
-  // if (msg.type === 'create-rectangles') {
-  //   const nodes: SceneNode[] = [];
-  //   for (let i = 0; i < msg.count; i++) {
-  //     const rect = figma.createRectangle();
-  //     rect.x = i * 150;
-  //     rect.fills = [{ type: 'SOLID', color: { r: 1, g: 0.5, b: 0 } }];
-  //     figma.currentPage.appendChild(rect);
-  //     nodes.push(rect);
-  //   }
-  //   figma.currentPage.selection = nodes;
-  //   figma.viewport.scrollAndZoomIntoView(nodes);
-  // }
+// if (msg.type === 'create-rectangles') {
+//   const nodes: SceneNode[] = [];
+//   for (let i = 0; i < msg.count; i++) {
+//     const rect = figma.createRectangle();
+//     rect.x = i * 150;
+//     rect.fills = [{ type: 'SOLID', color: { r: 1, g: 0.5, b: 0 } }];
+//     figma.currentPage.appendChild(rect);
+//     nodes.push(rect);
+//   }
+//   figma.currentPage.selection = nodes;
+//   figma.viewport.scrollAndZoomIntoView(nodes);
+// }
 
-  // Make sure to close the plugin when you're done. Otherwise the plugin will
-  // keep running, which shows the cancel button at the bottom of the screen.
+// Make sure to close the plugin when you're done. Otherwise the plugin will
+// keep running, which shows the cancel button at the bottom of the screen.
 
 // };
-
