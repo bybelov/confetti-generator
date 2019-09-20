@@ -1,0 +1,33 @@
+{
+  "name": "confetti",
+  "version": "1.0.0",
+  "description": "plugin for figma",
+  "main": "code.js",
+  "scripts": {
+    "start": "npx webpack --mode=development --watch",
+    "build": "npx webpack --mode=production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "figma",
+    "confetti",
+    "svg",
+    "pattern",
+    "random"
+  ],
+  "author": "bybelov@gmail.com",
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^3.2.0",
+    "html-webpack-inline-source-plugin": "0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
+    "ts-loader": "^6.1.0",
+    "typescript": "^3.6.3",
+    "url-loader": "^2.1.0",
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9"
+  }
+}
