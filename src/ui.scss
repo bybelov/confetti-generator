@@ -36,6 +36,19 @@ body {
 
 main {
   padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  header{
+    flex: 0;
+  }
+  body{
+    flex: 1;
+  }
+  footer{
+    flex: 0;
+    margin-top: auto;
+  }
 }
 
 h2{

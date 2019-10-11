@@ -15,6 +15,13 @@ module.exports = (env, argv) => ({
 
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: [
+          path.resolve(__dirname, 'node_modules')
+        ],
+      },
       // Converts TypeScript code to JavaScript
       { test: /\.tsx?$/, use: 'ts-loader', exclude: /node_modules/ },
 

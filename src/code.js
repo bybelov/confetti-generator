@@ -1,122 +1,115 @@
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min)) + min;
+'use strict'
+
+function randomInt(from, to) {
+  return Math.floor(from + (to - from) * Math.random());
 }
 
 function randomFloat(min, max) {
   return parseFloat(((Math.random() * (max - min)) + min).toFixed(1));
 }
 
-function randn_bm(min, max, skew) {
-  var u = 0,
-    v = 0;
-  while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
-  while (v === 0) v = Math.random();
-  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-
-  num = num / 10.0 + 0.5; // Translate to 0 -> 1
-  if (num > 1 || num < 0) num = randn_bm(min, max, skew); // resample between 0 and 1 if out of range
-  num = Math.pow(num, skew); // Skew
-  num *= max - min; // Stretch to fill range
-  num += min; // offset to min
-  return num;
+function noRepeatX(nodes) {
+  for (let k; k < nodes.length; k++) {
+    if ((el.x + el.width) < node[k].x && (el.x + el.width) > (node[k].x + node[k].width)) {
+      return
+    } else {
+      el.x = randomInt(0, maxX);
+      noRepeatX();
+    }
+  }
 }
 
+function noRepeatY(nodes) {
+  for (let k; k < nodes.length; k++) {
+    if ((el.y + el.height) < node[k].y && (el.y + el.height) > (node[k].y + node[k].height)) {
+      return
+    } else {
+      el.y = random(0, maxY);
+      noRepeatY();
+    }
+  }
+}
 
 figma.showUI(__html__, {
   width: 356,
-  height: 440
+  height: 400
 });
 
 figma.ui.onmessage = msg => {
-  // One way of distinguishing between different types of messages sent from
-  // your HTML page is to use an object with a "type" property like this.
 
-  if (msg.type === 'generate-confetti') {
+  if (msg.type === 'magic') {
 
     const data = msg.data;
-    var nodes = [];
+    let parentNode,
+      maxX,
+      maxY,
+      nodes = [],
+      selections,
+      selectionsLength;
 
-    // selection nodes
-    const selections = figma.currentPage.selection
-    const selectionsLength = selections.length
+    selections = figma.currentPage.selection;
+    selectionsLength = selections.length;
 
-    // parent node
-    const parentNode = selections[0].parent
-
-    // max x, y coordinates
-    const maxX = parentNode.width
-    const maxY = parentNode.height
-
-    for (let i = 0; i < data.quantity; i++) {
-
-      let el = selections[randomInt(0, selectionsLength)];
-
-      // const newNode = node.cloneNode();
-      // node.rotation = randomInt(0, 360);
-      // node.opacity = randomFloat(0.1, 1);
-      // const wh = newNode.width / newNode.height
-      // const coefficient = randomFloat(0.5, wh + 0.1);
-      // newNode.resize(
-      //   Math.floor(newNode.width * coefficient),
-      //   Math.floor(newNode.height * coefficient)
-      // );
-      el.opacity = randomFloat(0.1, 1);
-
-      el.x = randn_bm(0, (maxX - el.width), 1);
-      el.y = randn_bm(0, (maxY - el.height), 1);
-
-      // console.log(`el ${i}, id: ${el.id}, x: ${el.x}, y: ${el.y} `);
-      parentNode.appendChild(el.clone())
+    try {
+      // parent node
+      parentNode = selections[0].parent
+      if (parentNode.type === 'PAGE') {
+        alert('You have chosen a parent. Select its children.');
+        return
+      }
+      // max x, y coordinates
+      maxX = parentNode.width;
+      maxY = parentNode.height;
+    } catch (error) {
+      alert('Select the elements inside the frame');
+      return
     }
 
-    // figma.currentPage.selection = nodes
-    // figma.viewport.scrollAndZoomIntoView(nodes)
+    let length;
+    if (data.quantity - selectionsLength <= 0) {
+      length = data.quantity;
+    } else {
+      length = data.quantity - selectionsLength;
+    }
 
-    // const nodes: SceneNode[] = [];
-    // for (let i = 0; i < msg.count; i++) {
-    //   const rect = figma.createRectangle();
-    //   rect.x = i * 150;
-    //   rect.fills = [{ type: 'SOLID', color: { r: 1, g: 0.5, b: 0 } }];
-    //   figma.currentPage.appendChild(rect);
-    //   nodes.push(rect);
-    // }
-    // figma.currentPage.selection = nodes;
-    // figma.viewport.scrollAndZoomIntoView(nodes);
+    for (let i = 0; i < length; i++) {
 
+      const el = selections[randomInt(0, selectionsLength)];
+
+      if (data.rotation === true) {
+        el.rotation = randomInt(data.rotationFrom, data.rotationTo);
+      }
+      if (data.opacity === true) {
+        el.opacity = randomFloat(data.opacityFrom, data.opacityTo);
+      }
+
+      if (data.size === true) {
+        const proportional = el.width / el.height
+        const resizeWidth = randomInt(data.sizeFrom, data.sizeTo)
+        const resizeHeight = resizeWidth / proportional
+        el.resize(resizeWidth, resizeHeight)
+      }
+
+      el.x = randomInt(0, maxX);
+      el.y = randomInt(0, maxY);
+
+      // console.log(`id: ${el.id}, x: ${el.x}, y: ${el.y}`);
+      noRepeatX(nodes);
+      noRepeatY(nodes);
+
+      // nodes.push(el);
+
+      const clone = el.clone();
+      clone.name = `${el.name}:${i + 1}`;
+
+      parentNode.appendChild(clone);
+
+    } // end for
   }
 
-  // Make sure to close the plugin when you're done. Otherwise the plugin will
-  // keep running, which shows the cancel button at the bottom of the screen.
-  figma.closePlugin();
+  if (msg.type === 'cancel') {
+    figma.clientStorage.setAsync('selections', null);
+    figma.closePlugin();
+  }
+
 };
-
-
-// This shows the HTML page in "ui.html".
-// figma.showUI(__html__);
-
-// console.log(nodes);
-
-// Calls to "parent.postMessage" from within the HTML page will trigger this
-// callback. The callback will be passed the "pluginMessage" property of the
-// posted message.
-// figma.ui.onmessage = msg => {
-// One way of distinguishing between different types of messages sent from
-// your HTML page is to use an object with a "type" property like this.
-
-// if (msg.type === 'create-rectangles') {
-//   const nodes: SceneNode[] = [];
-//   for (let i = 0; i < msg.count; i++) {
-//     const rect = figma.createRectangle();
-//     rect.x = i * 150;
-//     rect.fills = [{ type: 'SOLID', color: { r: 1, g: 0.5, b: 0 } }];
-//     figma.currentPage.appendChild(rect);
-//     nodes.push(rect);
-//   }
-//   figma.currentPage.selection = nodes;
-//   figma.viewport.scrollAndZoomIntoView(nodes);
-// }
-
-// Make sure to close the plugin when you're done. Otherwise the plugin will
-// keep running, which shows the cancel button at the bottom of the screen.
-
-// };
