@@ -49,7 +49,7 @@ onChangeCheckbox(size)
 onChangeCheckbox(rotation)
 
 function minmaxHandler(element) {
-  element.addEventListener('blur', (e) => {
+  element.addEventListener('keyup', (e) => {
     maxLengthCheck(e.target)
     e.target.value = minmax(e.target.value, e.target.min, e.target.max)
   })

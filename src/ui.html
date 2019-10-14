@@ -5,17 +5,18 @@
     </header>
     <div class="body">
       <div class="form-group">
-        <div class="form-group__title">Quantity elements (<=999)</div> <div class="row">
+        <div class="form-group__title">Quantity elements (<=999)</div> 
+        <div class="row">
             <div class="text-field text-field--single">
-              <input name="quantity" id="quantity" type="number" value="25" min="1" max="999" step="1">
+              <input name="quantity" id="quantity" type="number" value="25" min="0" max="999" step="1">
               <label for="columns">Quantity:</label>
             </div>
         </div>
       </div>
       <div class="form-group">
         <label class="checkbox">
-          <input type="checkbox" name="opacity" id="opacity" checked>
-          <span>Opacity (0.1 - 1.0)</span>
+          <input class="checkbox__input" type="checkbox" name="opacity" id="opacity" checked>
+          <span class="checkbox__label">Opacity (0.1 - 1.0)</span>
         </label>
         <div class="row">
           <div class="text-field">
@@ -30,8 +31,8 @@
       </div>
       <div class="form-group">
         <label class="checkbox">
-          <input type="checkbox" name="size" id="size" checked>
-          <span>Resize (1 - 999 px)</span>
+          <input class="checkbox__input" type="checkbox" name="size" id="size" checked>
+          <span class="checkbox__label">Resize (1 - 999 px)</span>
         </label>
         <div class="row">
           <div class="text-field">
@@ -46,8 +47,8 @@
       </div>
       <div class="form-group">
         <label class="checkbox">
-          <input type="checkbox" name="rotation" id="rotation" checked>
-          <span>Rotation (0 - 360 deg)</span>
+          <input class="checkbox__input" type="checkbox" name="rotation" id="rotation" checked>
+          <span class="checkbox__label">Rotation (0 - 360 deg)</span>
         </label>
         <div class="row">
           <div class="text-field">
